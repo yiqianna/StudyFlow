@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyFlow — UX Case Study</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #0d9488;
+      --teal-dark: #0f766e;
+      --teal-light: #14b8a6;
+      --teal-bg: #e6faf8;
+      --text: #0f172a;
+      --muted: #64748b;
+      --subtle: #475569;
+      --bg: #f8f9fb;
+      --white: #ffffff;
+      --border: #e2e8f0;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #f2f3ff 0%, #f5f7fb 48%, #f3f6f2 100%);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── Floating orbital background ── */
+    .orbital-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .orbital-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(0.5px);
+      opacity: 0.75;
+      will-change: transform;
+      animation: orb-float 20s ease-in-out infinite;
+    }
+    .orbital-blob.one {
+      width: 1200px;
+      height: 1200px;
+      right: -320px;
+      top: 120px;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.42) 56%, rgba(255,255,255,0) 72%);
+      border: 1px solid rgba(255,255,255,0.65);
+      animation-delay: 0s;
+    }
+    .orbital-blob.two {
+      width: 900px;
+      height: 900px;
+      left: -280px;
+      bottom: -260px;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 250, 238, 0.68) 0%, rgba(212, 250, 238, 0.30) 58%, rgba(212, 250, 238, 0) 74%);
+      border: 1px solid rgba(255,255,255,0.45);
+      animation-delay: -7s;
+    }
+    .orbital-blob.three {
+      width: 760px;
+      height: 760px;
+      left: 12%;
+      top: -360px;
+      background: radial-gradient(circle at 50% 50%, rgba(222, 226, 255, 0.72) 0%, rgba(222, 226, 255, 0.28) 58%, rgba(222, 226, 255, 0) 74%);
+      border: 1px solid rgba(255,255,255,0.4);
+      animation-delay: -12s;
+    }
+    @keyframes orb-float {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -24px, 0); }
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(248,249,251,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; color: var(--text); text-decoration: none; }
+    .nav-logo span { font-size: 20px; }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s, opacity 0.2s;
+      position: relative;
+      padding-bottom: 6px;
+    }
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--teal);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 220ms ease;
+      opacity: 0.95;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .nav-links a.active-section {
+      color: var(--teal);
+      font-weight: 700;
+    }
+    .nav-links a.active-section::after { transform: scaleX(1); }
+    .nav-cta { font-size: 13px; font-weight: 700; padding: 8px 18px; border-radius: 999px; background: var(--teal); color: #fff; text-decoration: none; transition: opacity 0.2s; }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      background: linear-gradient(160deg, #0f766e 0%, #0d9488 60%, #14b8a6 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before, .hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      pointer-events: none;
+      will-change: transform;
+    }
+    .hero::before {
+      width: 500px; height: 500px; left: -150px; top: -150px;
+      animation: hero-orb-float-a 11s ease-in-out infinite;
+    }
+    .hero::after  {
+      width: 400px; height: 400px; right: -100px; bottom: -100px;
+      animation: hero-orb-float-b 14s ease-in-out infinite;
+    }
+    @keyframes hero-orb-float-a {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(68px, -86px, 0) scale(1.08); }
+    }
+    @keyframes hero-orb-float-b {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(-62px, 76px, 0) scale(1.10); }
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.9);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 88px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: clamp(16px, 2vw, 21px);
+      color: rgba(255,255,255,0.75);
+      max-width: 540px;
+      line-height: 1.6;
+      font-weight: 500;
+      margin-bottom: 36px;
+    }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      padding: 14px 28px; border-radius: 999px; font-size: 14px; font-weight: 700;
+      background: #fff; color: var(--teal); text-decoration: none; transition: transform 0.2s;
+    }
+    .btn-secondary {
+      padding: 14px 28px; border-radius: 999px; font-size: 14px; font-weight: 700;
+      background: rgba(255,255,255,0.15); color: #fff; text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,0.3); transition: transform 0.2s;
+    }
+    .btn-primary:hover, .btn-secondary:hover { transform: scale(1.04); }
+
+    .hero-meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 56px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-meta-card {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 16px;
+      padding: 12px 20px;
+      text-align: center;
+      min-width: 160px;
+    }
+    .hero-meta-card .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.5); }
+    .hero-meta-card .value { font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px; }
+
+    /* ── Shared section ── */
+    section { padding: 96px 24px; position: relative; z-index: 1; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section-alt { background: transparent; }
+
+    .tag {
+      display: inline-block;
+      background: var(--teal-bg);
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: clamp(30px, 4vw, 48px);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      max-width: 600px;
+      margin-bottom: 16px;
+    }
+
+    .lead {
+      font-size: 15px;
+      color: var(--subtle);
+      max-width: 600px;
+      line-height: 1.75;
+      margin-bottom: 48px;
+    }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.48);
+      border-radius: 28px;
+      overflow: hidden;
+      margin-bottom: 0;
+      border: 1px solid rgba(255,255,255,0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .stat-cell { background: rgba(255,255,255,0.56); padding: 40px 24px; text-align: center; }
+    .stat-number { font-size: 48px; font-weight: 900; letter-spacing: -0.03em; color: var(--teal); line-height: 1; }
+    .stat-label { font-size: 13px; color: var(--muted); font-weight: 500; margin-top: 6px; }
+
+    /* ── Two-col text ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .two-col p { font-size: 15px; color: var(--subtle); line-height: 1.8; }
+    .two-col p + p { margin-top: 16px; }
+
+    /* ── Callout ── */
+    .callout {
+      margin-top: 40px;
+      border-radius: 24px;
+      padding: 36px 40px;
+      background: linear-gradient(135deg, rgba(230,250,248,0.6) 0%, rgba(240,249,255,0.56) 100%);
+      border: 1.5px solid rgba(178, 240, 235, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .callout-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--teal); margin-bottom: 12px; }
+    .callout blockquote { font-size: clamp(16px,2vw,20px); font-weight: 700; color: var(--text); line-height: 1.45; max-width: 680px; }
+    .callout blockquote em { font-style: italic; }
+
+    /* ── Empathy map ── */
+    .empathy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      position: relative;
+    }
+    .quadrant {
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .quadrant-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+    .quadrant ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .quadrant ul li { font-size: 12px; line-height: 1.5; opacity: 0.85; }
+    .quadrant ul li::before { content: "— "; }
+
+    .q-yellow { background: #fef9c3; }
+    .q-yellow .quadrant-title, .q-yellow li { color: #713f12; }
+    .q-purple { background: #ede9fe; }
+    .q-purple .quadrant-title, .q-purple li { color: #4c1d95; }
+    .q-blue   { background: #dbeafe; }
+    .q-blue .quadrant-title, .q-blue li { color: #1e3a5f; }
+    .q-green  { background: #dcfce7; padding-left: 40px; }
+    .q-green .quadrant-title, .q-green li { color: #14532d; }
+
+    .persona-center {
+      display: none;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 112px; height: 112px;
+      border-radius: 50%;
+      background: #f97316;
+      box-shadow: 0 0 0 6px #fff;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 10;
+    }
+    .persona-center p { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.4; }
+
+    /* ── Quotes ── */
+    .quotes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 48px;
+    }
+    .quote-card {
+      border-radius: 20px;
+      padding: 20px;
+      background: rgba(255,255,255,0.58);
+      border: 1px solid rgba(255,255,255,0.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .quote-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--teal); }
+    .quote-text { font-size: 13px; color: #334155; line-height: 1.6; margin-top: 8px; font-style: italic; }
+    .quote-author { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 8px; }
+
+    /* ── Features grid ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .feature-card {
+      border-radius: 24px;
+      padding: 28px;
+      background: rgba(255,255,255,0.56);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 16px;
+      background: var(--teal-bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .fd-block { display: flex; flex-direction: column; gap: 6px; }
+    .fd-row { display: flex; align-items: flex-start; gap: 6px; }
+    .fd-label {
+      min-width: 66px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      line-height: 1.65;
+    }
+    .fd-text {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── Design principle ── */
+    .principle-block {
+      margin-top: 48px;
+      border-radius: 28px;
+      padding: 48px 56px;
+      background: linear-gradient(160deg, #0f766e 0%, #0d9488 100%);
+    }
+    .principle-block .block-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.55); margin-bottom: 16px; }
+    .principle-block blockquote { font-size: clamp(17px,2vw,24px); font-weight: 700; color: #fff; line-height: 1.45; max-width: 680px; }
+
+    /* ── Evaluation ── */
+    .eval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .eval-card { border-radius: 24px; padding: 28px; }
+    .eval-card.positive { background: rgba(240, 253, 249, 0.72); border: 1.5px solid #a7f3d0; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .eval-card.negative { background: rgba(254, 242, 242, 0.72); border: 1.5px solid #fecaca; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .eval-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+    .eval-card.positive .eval-label { color: #059669; }
+    .eval-card.negative .eval-label { color: #dc2626; }
+    .eval-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .eval-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; }
+    .eval-card.positive .eval-list li { color: #065f46; }
+    .eval-card.negative .eval-list li { color: #7f1d1d; }
+    .eval-list li .check { flex-shrink: 0; margin-top: 1px; font-size: 13px; }
+    .eval-card.positive .check { color: #059669; }
+    .eval-card.negative .check { color: #dc2626; }
+
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .method-num { font-size: 32px; font-weight: 900; color: #e2e8f0; margin-bottom: 8px; }
+    .method-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .method-desc { font-size: 12px; color: var(--muted); line-height: 1.65; }
+
+    .method-box {
+      margin-top: 32px;
+      border-radius: 24px;
+      padding: 32px;
+      background: rgba(255,255,255,0.56);
+      border: 1px solid rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .method-box-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 20px; }
+
+    /* ── Footer ── */
+    footer {
+      background: #0f172a;
+      padding: 64px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 10px; }
+    .footer-logo span { font-size: 20px; }
+    .footer-logo strong { font-size: 15px; font-weight: 800; color: #fff; }
+    footer p { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+    .footer-cta {
+      padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 700;
+      background: var(--teal); color: #fff; text-decoration: none; transition: opacity 0.2s;
+    }
+    .footer-cta:hover { opacity: 0.85; }
+
+    /* ── Reveal animations ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 80ms; }
+    .reveal-d2 { transition-delay: 160ms; }
+    .reveal-d3 { transition-delay: 240ms; }
+    .reveal-d4 { transition-delay: 320ms; }
+    .reveal-d5 { transition-delay: 400ms; }
+
+    /* ── Micro-interactions ── */
+    .interactive-card {
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition:
+        transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 280ms ease,
+        border-color 280ms ease;
+      will-change: transform;
+    }
+    .interactive-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,0.34), rgba(255,255,255,0));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 250ms ease;
+    }
+    .interactive-card:hover::before { opacity: 1; }
+    .interactive-card:hover {
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
+      border-color: rgba(255,255,255,0.95);
+    }
+    .interactive-card.is-pressed { transform: scale(0.995) !important; }
+    .card-ripple {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(13,148,136,0.35), rgba(13,148,136,0.12), transparent 70%);
+      transform: translate(-50%, -50%) scale(0.5);
+      pointer-events: none;
+      animation: card-ripple 520ms ease-out forwards;
+    }
+    .magnetic-btn {
+      transition: transform 220ms ease;
+      will-change: transform;
+    }
+    @keyframes card-ripple {
+      to {
+        transform: translate(-50%, -50%) scale(14);
+        opacity: 0;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .interactive-card,
+      .magnetic-btn { transition: none !important; }
+      .card-ripple { display: none; }
+    }
+
+    /* ── Try it live ── */
+    .proto-page {
+      padding-bottom: 40px;
+      padding-top: 40px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .proto-page:first-child { padding-top: 0; }
+    .proto-page:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .proto-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .rationale-box {
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: rgba(13, 148, 136, 0.08);
+      border-left: 3px solid #0d9488;
+    }
+    .rationale-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #0d9488;
+      margin-bottom: 6px;
+    }
+    .rationale-box p {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    /* ── Design Process ── */
+    .process-steps {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      gap: 0; margin-top: 52px; position: relative;
+    }
+    .process-steps::before {
+      content: ''; position: absolute;
+      top: 22px; left: 10%; right: 10%; height: 2px;
+      background: linear-gradient(90deg, var(--teal) 0%, var(--border) 100%);
+    }
+    .process-step {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; text-align: center; padding: 0 8px;
+      position: relative;
+    }
+    .proc-icon {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 14px;
+      position: relative; z-index: 1;
+      border: 2px solid transparent;
+    }
+    .proc-icon.active {
+      background: var(--teal); color: white;
+      box-shadow: 0 4px 14px rgba(13,148,136,0.3);
+    }
+    .proc-icon.done {
+      background: #f0fdfa; color: var(--teal);
+      border-color: var(--teal);
+    }
+    .proc-title {
+      font-size: 12px; font-weight: 700; color: var(--text);
+      letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .proc-desc { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+
+    /* ── Reflection ── */
+    .reflection-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 28px; margin: 40px 0 0;
+    }
+    .reflection-card {
+      background: rgba(255,255,255,0.58); border-radius: 20px;
+      padding: 28px 28px 24px; border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .reflection-card h3 {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+    }
+    .r-list {
+      list-style: none; display: flex; flex-direction: column; gap: 11px;
+    }
+    .r-list li {
+      font-size: 13px; color: var(--subtle); line-height: 1.65;
+      padding-left: 18px; position: relative;
+    }
+    .r-list li::before {
+      content: '→'; position: absolute; left: 0;
+      color: var(--teal); font-weight: 700; font-size: 12px;
+    }
+
+    /* ── Key Screens ── */
+    .screen-section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #94a3b8;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .screen-section-label::after {
+      content: ''; flex: 1; height: 1px; background: #e2e8f0;
+    }
+    .screen-row {
+      display: flex; align-items: flex-start; gap: 56px;
+      position: relative; height: 455px;
+    }
+    .screen-phone-wrap { flex-shrink: 0; width: 210px; }
+    .phone-mini {
+      width: 210px; height: 455px; border-radius: 36px;
+      background: linear-gradient(145deg, #d4d0ca 0%, #c8c5bf 50%, #b8b5af 100%);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.4), 0 0 0 2px rgba(0,0,0,0.08), 0 24px 56px rgba(0,0,0,0.16);
+      padding: 8px; position: relative;
+    }
+    .phone-mini-screen {
+      width: 100%; height: 100%; border-radius: 29px; overflow: hidden;
+      background: linear-gradient(170deg, #dce3f7 0%, #ede9f8 45%, #f5f3e6 100%);
+      position: relative;
+    }
+    .phone-mini iframe {
+      width: 393px; height: 852px; border: none;
+      transform-origin: top left; transform: scale(0.494);
+      display: block; pointer-events: none;
+    }
+    .phone-mini-screen img.phone-static-shot {
+      width: 393px; height: 852px;
+      transform-origin: top left; transform: scale(0.494);
+      display: block; object-fit: cover; pointer-events: none;
+    }
+    .phone-dyn-island {
+      position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+      width: 70px; height: 21px; border-radius: 12px;
+      background: #000; z-index: 40; pointer-events: none;
+    }
+    .screen-ann-panel { flex: 1; position: relative; height: 455px; }
+    .screen-ann-item {
+      position: absolute; left: 0;
+      display: flex; align-items: flex-start; gap: 14px; max-width: 390px;
+    }
+    .ann-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #f0fdfa; color: #0d9488;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; border: 1.5px solid #99f6e4; margin-top: 1px;
+    }
+    .ann-name {
+      font-size: 14px; font-weight: 700; color: #0f172a;
+      margin-bottom: 5px; line-height: 1.3;
+    }
+    .ann-text { font-size: 12.5px; color: #64748b; line-height: 1.65; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links, .nav-cta { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+      .empathy-grid { grid-template-columns: 1fr; }
+      .persona-center { display: none !important; }
+      .quotes-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .eval-grid { grid-template-columns: 1fr; }
+      .method-grid { grid-template-columns: 1fr; }
+      .principle-block { padding: 32px 24px; }
+      .process-steps { flex-direction: column; gap: 24px; }
+      .process-steps::before { display: none; }
+      .process-step { align-items: flex-start; text-align: left; flex-direction: row; gap: 16px; }
+      .proc-icon { margin-bottom: 0; flex-shrink: 0; }
+      .reflection-grid { grid-template-columns: 1fr; }
+      .screen-row { height: auto; flex-direction: column; gap: 32px; }
+      .screen-ann-panel { height: auto; position: static; }
+      .screen-ann-item { position: static !important; margin-bottom: 20px; }
+      footer { flex-direction: column; align-items: flex-start; padding: 48px 24px; }
+      #prototype [style*="grid-template-columns: 340px"] {
+        grid-template-columns: 1fr !important;
+      }
+      #prototype [style*="position: sticky"] {
+        position: relative !important;
+        top: auto !important;
+      }
+    }
+    @media (min-width: 769px) {
+      .persona-center { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orbital-bg" aria-hidden="true">
+    <span class="orbital-blob one"></span>
+    <span class="orbital-blob two"></span>
+    <span class="orbital-blob three"></span>
+  </div>
+
+  <!-- Nav -->
+  <nav id="nav">
+    <a href="#" class="nav-logo"><span>🎓</span> StudyFlow</a>
+    <div class="nav-links">
+      <a href="#process">Process</a>
+      <a href="#problem">Problem</a>
+      <a href="#research">Research</a>
+      <a href="#solution">Design</a>
+      <a href="#screens">Screens</a>
+      <a href="#evaluation">Evaluation</a>
+      <a href="#reflection">Reflection</a>
+    </div>
+    <a href="./app/index.html" class="nav-cta">View Full Live Prototype →</a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">UX Case Study · Spring 2026</div>
+    <h1>StudyFlow</h1>
+    <p>A research-driven mobile app that helps university students break overwhelming coursework into clear, structured steps — designed through user interviews, iterative prototyping, and usability testing.</p>
+    <div class="hero-btns">
+      <a href="#process" class="btn-primary">View Case Study</a>
+      <a href="./app/index.html" class="btn-secondary">View Full Live Prototype →</a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-card">
+        <div class="label">My Role</div>
+        <div class="value">UX Researcher · Interaction Designer</div>
+      </div>
+      <div class="hero-meta-card">
+        <div class="label">Methods</div>
+        <div class="value">Interviews · Empathy Mapping · Usability Testing</div>
+      </div>
+      <div class="hero-meta-card">
+        <div class="label">Timeline</div>
+        <div class="value">10 Weeks · Spring 2026</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section style="padding: 72px 24px;">
+    <div class="container">
+      <div class="stats-grid reveal">
+        <div class="stat-cell"><div class="stat-number">6</div><div class="stat-label">Participants Interviewed</div></div>
+        <div class="stat-cell"><div class="stat-number">3</div><div class="stat-label">Research Methods</div></div>
+        <div class="stat-cell"><div class="stat-number">2</div><div class="stat-label">Prototype Iterations</div></div>
+        <div class="stat-cell"><div class="stat-number">100%</div><div class="stat-label">Found Navigation Intuitive</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Design Process -->
+  <section id="process" class="section-alt">
+    <div class="container">
+      <div class="reveal"><span class="tag">Design Process</span></div>
+      <h2 class="reveal reveal-d1">A structured, research-first approach.</h2>
+      <p class="lead reveal reveal-d2">Every design decision traces back to something a user said, felt, or struggled with. This case study follows a double-diamond process — diverging to understand the problem, converging to define it, then repeating through design and validation.</p>
+
+      <div class="process-steps reveal reveal-d3">
+        <div class="process-step">
+          <div class="proc-icon done">🔍</div>
+          <div>
+            <div class="proc-title">Discover</div>
+            <div class="proc-desc">Desk research, literature review, competitive analysis of Canvas, Notion, and Todoist</div>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="proc-icon done">🗺</div>
+          <div>
+            <div class="proc-title">Define</div>
+            <div class="proc-desc">Empathy mapping, persona development, HMW questions, affinity clustering</div>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="proc-icon done">✏️</div>
+          <div>
+            <div class="proc-title">Design</div>
+            <div class="proc-desc">Information architecture, user flows, wireframes, high-fidelity UI in Figma</div>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="proc-icon active">📱</div>
+          <div>
+            <div class="proc-title">Prototype</div>
+            <div class="proc-desc">Interactive React prototype with real navigation, live progress tracking, and AI chat</div>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="proc-icon done">🧪</div>
+          <div>
+            <div class="proc-title">Test</div>
+            <div class="proc-desc">Usability sessions with 6 UW undergrads, task completion, follow-up interviews</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem -->
+  <section id="problem">
+    <div class="container">
+      <div class="reveal"><span class="tag">Problem</span></div>
+      <h2 class="reveal reveal-d1">Students are overwhelmed, not just busy.</h2>
+      <div class="two-col">
+        <div class="reveal reveal-d2">
+          <p>University students often struggle to manage multiple assignments, deadlines, and academic responsibilities across different courses. As coursework accumulates, students must keep track of tasks across several classes, each with its own schedule and expectations.</p>
+          <p>Research in goal-setting theory suggests that large or ambiguous goals can reduce motivation and make it harder for individuals to initiate tasks, while breaking goals into smaller and more specific steps can significantly improve motivation and task completion <strong style="color:#0d9488">(Locke & Latham, 2002)</strong>.</p>
+        </div>
+        <div class="reveal reveal-d3">
+          <p>Although many productivity tools exist — Notion, Todoist, Google Calendar — these tools primarily focus on <em>recording</em> tasks and deadlines rather than helping students approach and progress through their work.</p>
+          <p>Learning management systems such as Canvas display assignments separately within each course, requiring students to manually combine information across platforms. Students are often left with long lists that feel overwhelming rather than helpful for guiding action.</p>
+        </div>
+      </div>
+      <div class="callout reveal reveal-d4">
+        <div class="callout-label">Key Insight</div>
+        <blockquote>"The core issue is not simply the <em>number</em> of assignments students face, but how those assignments are structured and presented."</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- Research -->
+  <section id="research" class="section-alt">
+    <div class="container">
+      <div class="reveal"><span class="tag">User Research</span></div>
+      <h2 class="reveal reveal-d1">Listening before designing.</h2>
+      <p class="lead reveal reveal-d2">To avoid designing for assumptions, I conducted desk research, literature review, and user empathy mapping before touching wireframes. The primary artifact was a deep empathy map for Marco Guo — a 20-year-old Informatics & CS junior at UW — built from qualitative interviews and behavioral observation.</p>
+
+      <div class="callout reveal reveal-d3" style="margin-bottom: 48px;">
+        <div class="callout-label">Research Methods Used</div>
+        <div style="display:flex; gap:32px; flex-wrap:wrap; margin-top:8px;">
+          <div><strong style="color:var(--teal); font-size:13px;">① Desk Research</strong><br><span style="font-size:13px; color:var(--muted);">Literature review on goal-setting theory (Locke & Latham, 2002) and academic productivity tools</span></div>
+          <div><strong style="color:var(--teal); font-size:13px;">② Empathy Mapping</strong><br><span style="font-size:13px; color:var(--muted);">Synthesizing user behaviors, emotions, and pain points into a structured persona artifact</span></div>
+          <div><strong style="color:var(--teal); font-size:13px;">③ Usability Testing</strong><br><span style="font-size:13px; color:var(--muted);">Task-based sessions with 6 UW undergrads, followed by semi-structured retrospective interviews</span></div>
+        </div>
+      </div>
+
+      <div class="empathy-grid reveal">
+        <div class="quadrant q-yellow">
+          <div class="quadrant-title">🧠 Thinks & Feels</div>
+          <ul>
+            <li>"I'll never get through all of this."</li>
+            <li>Anxious when assignments look too big</li>
+            <li>Afraid of falling behind peers</li>
+            <li>Guilty when skipping a study day</li>
+            <li>Uncertain which task to start next</li>
+            <li>Relieved when progress is visible</li>
+            <li>Wants to feel in control of his time</li>
+          </ul>
+        </div>
+        <div class="quadrant q-purple">
+          <div class="quadrant-title">👂 Hears</div>
+          <ul>
+            <li>Professors: "Start early, don't cram."</li>
+            <li>Peers comparing grades and stress</li>
+            <li>Canvas alerts piling up each day</li>
+            <li>Advisors: "Balance your workload."</li>
+            <li>Family: "How are your grades?"</li>
+            <li>Study apps using streaks to motivate</li>
+            <li>Roommates: "Let's take a study break!"</li>
+          </ul>
+        </div>
+        <div class="quadrant q-blue">
+          <div class="quadrant-title">🗣 Says & Does</div>
+          <ul>
+            <li>"I don't know where to even start."</li>
+            <li>Opens Canvas and feels overwhelmed</li>
+            <li>Makes long to-do lists, completes few</li>
+            <li>Uses Google Calendar for deadlines only</li>
+            <li>Procrastinates when tasks feel huge</li>
+            <li>Studies better with a clear checklist</li>
+            <li>Celebrates small wins with friends</li>
+          </ul>
+        </div>
+        <div class="quadrant q-green">
+          <div class="quadrant-title">👀 Sees</div>
+          <ul>
+            <li>Long Canvas lists with no order</li>
+            <li>Peers using Notion, Duolingo, Todoist</li>
+            <li>Deadlines without step-by-step guidance</li>
+            <li>Gamified apps that punish missed days</li>
+            <li>Cluttered calendar with no priority order</li>
+            <li>Progress bars in apps that feel arbitrary</li>
+          </ul>
+        </div>
+        <div class="persona-center">
+          <p>Marco Guo<br>Age 20<br>Informatics & CS<br>UW Junior</p>
+        </div>
+      </div>
+
+      <div class="quotes-grid">
+        <div class="quote-card reveal">
+          <div class="quote-tag">✓ Positive</div>
+          <p class="quote-text">"The centralized view made it easier to understand my whole workload."</p>
+          <p class="quote-author">— UW Undergraduate Participant</p>
+        </div>
+        <div class="quote-card reveal reveal-d1">
+          <div class="quote-tag">✓ Positive</div>
+          <p class="quote-text">"Visual progress indicators showed me how much work I'd already done."</p>
+          <p class="quote-author">— UW Undergraduate Participant</p>
+        </div>
+        <div class="quote-card reveal reveal-d2">
+          <div class="quote-tag">✓ Positive</div>
+          <p class="quote-text">"AI guidance helped when I wasn't sure how to begin an assignment."</p>
+          <p class="quote-author">— UW Undergraduate Participant</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Design Decisions -->
+  <section id="solution">
+    <div class="container">
+      <div class="reveal"><span class="tag">Design Decisions</span></div>
+      <h2 class="reveal reveal-d1">Every feature starts with a finding.</h2>
+      <p class="lead reveal reveal-d2">Rather than listing features, each design decision below maps directly to a specific user pain point or behavioral insight uncovered in research. This traceability was central to my design process.</p>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">🗂</div>
+          <h3>Centralized Dashboard</h3>
+          <div class="fd-block">
+            <div class="fd-row"><span class="fd-label">Finding:</span><span class="fd-text">Students jump between Canvas, email, and calendars every day.</span></div>
+            <div class="fd-row"><span class="fd-label">Decision:</span><span class="fd-text">Put everything in one place so students can start faster and think less.</span></div>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-d1">
+          <div class="feature-icon">✅</div>
+          <h3>Step-by-Step Breakdown</h3>
+          <div class="fd-block">
+            <div class="fd-row"><span class="fd-label">Finding:</span><span class="fd-text">Big tasks make students avoid starting.</span></div>
+            <div class="fd-row"><span class="fd-label">Decision:</span><span class="fd-text">Break assignments into small steps so it feels easier to begin.</span></div>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-d2">
+          <div class="feature-icon">📈</div>
+          <h3>Visible Progress</h3>
+          <div class="fd-block">
+            <div class="fd-row"><span class="fd-label">Finding:</span><span class="fd-text">Students feel better when they can see progress.</span></div>
+            <div class="fd-row"><span class="fd-label">Decision:</span><span class="fd-text">Show clear progress bars for courses and tasks.</span></div>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-d3">
+          <div class="feature-icon">🤖</div>
+          <h3>Contextual AI Guidance</h3>
+          <div class="fd-block">
+            <div class="fd-row"><span class="fd-label">Finding:</span><span class="fd-text">The most common problem was not knowing where to start.</span></div>
+            <div class="fd-row"><span class="fd-label">Decision:</span><span class="fd-text">Use AI to give quick, course-specific help when students get stuck.</span></div>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-d4">
+          <div class="feature-icon">📅</div>
+          <h3>Time-Aware Schedule</h3>
+          <div class="fd-block">
+            <div class="fd-row"><span class="fd-label">Finding:</span><span class="fd-text">Students said their calendars felt cluttered and hard to prioritize.</span></div>
+            <div class="fd-row"><span class="fd-label">Decision:</span><span class="fd-text">Use a simple daily schedule to plan study time around classes.</span></div>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-d5">
+          <div class="feature-icon">🔗</div>
+          <h3>Canvas Integration</h3>
+          <div class="fd-block">
+            <div class="fd-row"><span class="fd-label">Finding:</span><span class="fd-text">Re-entering Canvas data by hand is frustrating and slow.</span></div>
+            <div class="fd-row"><span class="fd-label">Decision:</span><span class="fd-text">Sync directly with Canvas so data stays accurate automatically.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-block reveal">
+        <div class="block-label">Core Design Principle</div>
+        <blockquote>"The role of AI here is not to do the work for students — it's to lower the barrier to starting. Preserving student agency was a non-negotiable constraint throughout the design process."</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Screens -->
+  <section id="screens" style="background:transparent; padding: 96px 0; border-top: 1px solid rgba(226,232,240,0.65);">
+    <div class="container">
+      <div class="reveal"><span class="tag">Key Screens</span></div>
+      <h2 class="reveal reveal-d1">Designed for how students actually work.</h2>
+      <p class="lead reveal reveal-d2">Three core screens shaped directly by user research — from scattered task lists to not knowing where to start.</p>
+
+      <div style="display:flex; flex-direction:column; gap:72px; margin-top:64px;">
+
+        <!-- 01 Home Dashboard -->
+        <div class="reveal">
+          <div class="screen-section-label">01 — Home Dashboard</div>
+          <div class="screen-row">
+            <div class="screen-phone-wrap">
+              <div class="phone-mini">
+                <div class="phone-mini-screen">
+                  <iframe src="./app/index.html?embed=1#/home" title="Home Dashboard"></iframe>
+                  <div class="phone-dyn-island"></div>
+                </div>
+              </div>
+            </div>
+            <div class="screen-ann-panel">
+              <div class="screen-ann-item" style="top:52px;">
+                <div class="ann-num">1</div>
+                <div>
+                  <p class="ann-name">Category Filter</p>
+                  <p class="ann-text">Filter by Science, Math, CS, or Engineering to surface the most relevant coursework instantly — no context-switching required.</p>
+                </div>
+              </div>
+              <div class="screen-ann-item" style="top:148px;">
+                <div class="ann-num">2</div>
+                <div>
+                  <p class="ann-name">Today's Focus</p>
+                  <p class="ann-text">The most urgent task is always front and center, with a live progress bar and a one-tap Continue Session flow to reduce decision fatigue.</p>
+                </div>
+              </div>
+              <div class="screen-ann-item" style="top:258px;">
+                <div class="ann-num">3</div>
+                <div>
+                  <p class="ann-name">Active Courses</p>
+                  <p class="ann-text">All assignments at a glance — real-time status badges (Up Next / Later / Done), due dates, and color-coded course icons across every class.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 02 AI Assistant -->
+        <div class="reveal">
+          <div class="screen-section-label">02 — AI Study Assistant</div>
+          <div class="screen-row">
+            <div class="screen-phone-wrap">
+              <div class="phone-mini">
+                <div class="phone-mini-screen">
+                  <img
+                    class="phone-static-shot"
+                    src="./assets/assistant-live-clean.png"
+                    alt="AI Assistant static screenshot"
+                  />
+                  <div class="phone-dyn-island"></div>
+                </div>
+              </div>
+            </div>
+            <div class="screen-ann-panel">
+              <div class="screen-ann-item" style="top:34px;">
+                <div class="ann-num">1</div>
+                <div>
+                  <p class="ann-name">Context-Aware Greeting</p>
+                  <p class="ann-text">The AI already knows your current subject, so you can dive straight into a question without re-explaining your situation every session.</p>
+                </div>
+              </div>
+              <div class="screen-ann-item" style="top:136px;">
+                <div class="ann-num">2</div>
+                <div>
+                  <p class="ann-name">Conversational Explanations</p>
+                  <p class="ann-text">Responses use plain language, analogies, and structured breakdowns — designed to guide understanding, not just supply answers.</p>
+                </div>
+              </div>
+              <div class="screen-ann-item" style="top:252px;">
+                <div class="ann-num">3</div>
+                <div>
+                  <p class="ann-name">Always-Available Input</p>
+                  <p class="ann-text">The input bar stays anchored at the bottom so quick questions are never more than a tap away, mid-study or mid-task.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 03 Task Breakdown -->
+        <div class="reveal">
+          <div class="screen-section-label">03 — Step-by-Step Task View</div>
+          <div class="screen-row">
+            <div class="screen-phone-wrap">
+              <div class="phone-mini">
+                <div class="phone-mini-screen">
+                  <iframe src="./app/index.html?embed=1#/tasks/info360" title="Task Detail"></iframe>
+                  <div class="phone-dyn-island"></div>
+                </div>
+              </div>
+            </div>
+            <div class="screen-ann-panel">
+              <div class="screen-ann-item" style="top:38px;">
+                <div class="ann-num">1</div>
+                <div>
+                  <p class="ann-name">Task Header</p>
+                  <p class="ann-text">Course code, assignment name, professor, and due date — all the context you need without opening Canvas, email, or a syllabus.</p>
+                </div>
+              </div>
+              <div class="screen-ann-item" style="top:148px;">
+                <div class="ann-num">2</div>
+                <div>
+                  <p class="ann-name">Step-by-Step Breakdown</p>
+                  <p class="ann-text">Large assignments broken into small, checkable steps. One tap marks a step done and automatically advances to the next — helping you stay on track.</p>
+                </div>
+              </div>
+              <div class="screen-ann-item" style="top:276px;">
+                <div class="ann-num">3</div>
+                <div>
+                  <p class="ann-name">Built-in Focus Timer</p>
+                  <p class="ann-text">A Pomodoro-style timer suggests a duration based on the current step, keeping study sessions time-bounded and productive.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Evaluation -->
+  <section id="evaluation" class="section-alt">
+    <div class="container">
+      <div class="reveal"><span class="tag">Evaluation</span></div>
+      <h2 class="reveal reveal-d1">Testing with real students.</h2>
+      <p class="lead reveal reveal-d2">We conducted informal user testing with six UW undergraduate students who frequently manage multiple assignments. Participants completed realistic tasks and participated in short follow-up interviews.</p>
+
+      <div class="eval-grid">
+        <div class="eval-card positive reveal">
+          <div class="eval-label">✓ What Worked</div>
+          <ul class="eval-list">
+            <li><span class="check">✓</span> Centralized view made workload easier to understand</li>
+            <li><span class="check">✓</span> Visual progress indicators showed completion at a glance</li>
+            <li><span class="check">✓</span> AI guidance was helpful when starting felt unclear</li>
+            <li><span class="check">✓</span> Step-by-step task breakdown reduced overwhelm</li>
+            <li><span class="check">✓</span> Participants understood the workflow quickly</li>
+          </ul>
+        </div>
+        <div class="eval-card negative reveal reveal-d1">
+          <div class="eval-label">⚠ Limitations</div>
+          <ul class="eval-list">
+            <li><span class="check">⚠</span> Small sample size limits generalizability of findings</li>
+            <li><span class="check">⚠</span> Focused on undergrads — may not transfer to other populations</li>
+            <li><span class="check">⚠</span> AI guidance may generate ethically problematic responses</li>
+            <li><span class="check">⚠</span> Canvas integration was simulated, not fully functional</li>
+            <li><span class="check">⚠</span> Long-term behavior change was not measured</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="method-box reveal">
+        <div class="method-box-label">Methodology</div>
+        <div class="method-grid">
+          <div>
+            <div class="method-num">01</div>
+            <div class="method-title">Prototype Interaction</div>
+            <div class="method-desc">Participants explored the app and completed tasks such as reviewing assignments for the week.</div>
+          </div>
+          <div>
+            <div class="method-num">02</div>
+            <div class="method-title">Observation</div>
+            <div class="method-desc">We observed how participants interpreted the system structure and whether the workflow was intuitive.</div>
+          </div>
+          <div>
+            <div class="method-num">03</div>
+            <div class="method-title">Follow-up Interview</div>
+            <div class="method-desc">Short qualitative interviews surfaced deeper insights about clarity, motivation, and design improvements.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reflection -->
+  <section id="reflection">
+    <div class="container">
+      <div class="reveal"><span class="tag">Reflection</span></div>
+      <h2 class="reveal reveal-d1">What I learned — and what I'd do next.</h2>
+      <p class="lead reveal reveal-d2">Design is never finished, only shipped. Looking back at this project with fresh eyes, here's what I'd change, what surprised me, and where I'd take the next iteration.</p>
+
+      <div class="reflection-grid reveal reveal-d3">
+        <div class="reflection-card">
+          <h3>💡 Key Takeaways</h3>
+          <ul class="r-list">
+            <li>The "overwhelm" problem turned out to be as much <em>emotional</em> as informational — this shifted my design from a task manager toward emotional scaffolding. I should have surfaced this insight earlier.</li>
+            <li>Involving participants in ideation (co-design), not just validation, would have uncovered unexpected solutions I wouldn't have reached on my own.</li>
+            <li>The AI feature needs more rigorous ethical consideration around academic integrity — a constraint I'd make explicit from day one in a real product.</li>
+            <li>Designing for mobile-first forced clearer prioritization of what actually matters on each screen.</li>
+          </ul>
+        </div>
+        <div class="reflection-card">
+          <h3>🔭 Next Iterations</h3>
+          <ul class="r-list">
+            <li>Conduct longitudinal testing across a full academic quarter to measure whether behavior change persists beyond the novelty effect.</li>
+            <li>Expand research to include graduate students, international students, and community college learners to test generalizability.</li>
+            <li>Explore collaborative study features — research revealed that peer social dynamics are a strong motivator that the current design ignores.</li>
+            <li>Replace the simulated Canvas integration with a real OAuth flow to test whether real data changes how students interact with the system.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout reveal" style="margin-top: 40px;">
+        <div class="callout-label">Designer's Note</div>
+        <blockquote>"The most important design decision I made wasn't about the interface — it was choosing to treat academic overwhelm as an emotional and motivational problem, not just an organizational one. That reframing changed everything that followed."</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- Try it Live - REMOVED -->
+  <section id="prototype" style="display:none;">
+    <div>
+      <div style="margin-bottom: 56px;">
+        <span style="font-size:11px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:#0d9488;">Interactive Prototype</span>
+        <h2 style="font-size:clamp(30px,4vw,48px); font-weight:900; letter-spacing:-0.02em; line-height:1.1; color:#0f172a; margin-top:12px;">
+          Try it <span style="color:#0d9488;">live.</span>
+        </h2>
+        <p style="font-size:15px; color:#64748b; margin-top:12px; max-width:520px; line-height:1.7;">
+          This is the real, functional prototype — scroll, tap, and navigate through all 9 screens exactly as a user would experience them.
+        </p>
+      </div>
+
+      <!-- Two-col: phone left, pages right -->
+      <div style="display:grid; grid-template-columns: 320px 1fr; gap: 72px; align-items: start;">
+
+        <!-- Sticky phone frame -->
+        <div style="position: sticky; top: 80px;">
+          <div style="position:relative; width:270px; margin: 0 auto;">
+            <!-- Phone body — light silver like a real iPhone -->
+            <div style="
+              position:relative;
+              width:270px; height:585px;
+              border-radius:46px;
+              background: linear-gradient(145deg, #d4d0ca 0%, #c8c5bf 50%, #b8b5af 100%);
+              box-shadow:
+                0 0 0 1px rgba(255,255,255,0.5),
+                0 0 0 2px rgba(0,0,0,0.10),
+                0 24px 64px rgba(0,0,0,0.18),
+                0 8px 20px rgba(0,0,0,0.10),
+                inset 0 1px 2px rgba(255,255,255,0.6);
+            ">
+              <!-- Side buttons -->
+              <div style="position:absolute; left:-3px; top:86px; width:3px; height:26px; border-radius:3px 0 0 3px; background:#b0ada8; box-shadow:-1px 0 2px rgba(0,0,0,0.15);"></div>
+              <div style="position:absolute; left:-3px; top:126px; width:3px; height:50px; border-radius:3px 0 0 3px; background:#b0ada8; box-shadow:-1px 0 2px rgba(0,0,0,0.15);"></div>
+              <div style="position:absolute; left:-3px; top:188px; width:3px; height:50px; border-radius:3px 0 0 3px; background:#b0ada8; box-shadow:-1px 0 2px rgba(0,0,0,0.15);"></div>
+              <div style="position:absolute; right:-3px; top:142px; width:3px; height:66px; border-radius:0 3px 3px 0; background:#b0ada8; box-shadow:1px 0 2px rgba(0,0,0,0.15);"></div>
+
+              <!-- Screen area -->
+              <div style="
+                position:absolute; top:5px; left:5px; right:5px; bottom:5px;
+                border-radius:42px; overflow:hidden;
+                background:#dce3f7;
+              ">
+                <!-- embed=1 tells the app to show its own status bar even in mobile mode -->
+                <iframe
+                  src="./app/index.html?embed=1"
+                  style="width:393px; height:852px; border:none; transform-origin:top left; transform:scale(0.661); display:block;"
+                  title="StudyFlow Prototype"
+                ></iframe>
+              </div>
+
+              <!-- Dynamic island -->
+              <div style="position:absolute; top:11px; left:50%; transform:translateX(-50%); width:82px; height:25px; border-radius:14px; background:#000; z-index:40;"></div>
+              <!-- Home indicator -->
+              <div style="position:absolute; bottom:9px; left:50%; transform:translateX(-50%); width:96px; height:4px; border-radius:2px; background:rgba(0,0,0,0.2); z-index:10;"></div>
+              <!-- Glass glare -->
+              <div style="position:absolute; top:5px; left:5px; right:5px; height:30%; border-radius:42px 42px 80% 80%; background:linear-gradient(170deg,rgba(255,255,255,0.08) 0%,transparent 100%); pointer-events:none; z-index:20;"></div>
+            </div>
+          </div>
+          <p style="text-align:center; margin-top:18px; font-size:11px; color:#94a3b8; font-weight:500; letter-spacing:0.05em;">
+            ↑ Scroll &amp; interact directly
+          </p>
+        </div>
+
+        <!-- Page list -->
+        <div style="display:flex; flex-direction:column; gap:0; padding-top:4px;">
+
+          <!-- 01 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">01</span>
+              <span class="proto-badge" style="background:#ccfbf1; color:#0d9488;">ONBOARDING</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Welcome</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">Full-screen hero with teal gradient establishes brand identity. Feature cards explain core value props, and a single CTA reduces decision paralysis immediately.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>The gradient hero communicates energy and focus before any feature explanation — the visual tone sets expectations faster than text could.</p>
+            </div>
+          </div>
+
+          <!-- 02 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">02</span>
+              <span class="proto-badge" style="background:#ede9fe; color:#7c3aed;">AUTH</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Sign In</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">Clean sign-in form with email and password fields. Consistent with the app's teal color palette, with a secondary link back to the welcome screen.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>Keeping auth minimal prevents intimidation — students should feel welcomed, not interrogated. The single-step flow respects their time.</p>
+            </div>
+          </div>
+
+          <!-- 03 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">03</span>
+              <span class="proto-badge" style="background:#ccfbf1; color:#0d9488;">CORE · DASHBOARD</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Home</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">Personalized greeting, streak counter, category filter chips, Today's Focus card, and course cards with real-time progress — all in one scrollable view.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>The home screen is the emotional anchor. Progress visibility and streak reinforcement address the core finding that students feel better when advancement is measurable.</p>
+            </div>
+          </div>
+
+          <!-- 04 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">04</span>
+              <span class="proto-badge" style="background:#ccfbf1; color:#0d9488;">CORE · PLANNING</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Schedule</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">Google Calendar-style daily view with a week strip navigator, hourly time slots, color-coded course blocks precisely positioned by time, and a real-time indicator line.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>Seeing classes visually in time helps students plan study sessions around their actual schedule — addressing the "cluttered calendar" pain point directly.</p>
+            </div>
+          </div>
+
+          <!-- 05 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">05</span>
+              <span class="proto-badge" style="background:#fef3c7; color:#d97706;">CORE · TASKS</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Tasks Overview</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">All courses in one centralized list with per-course progress bars. Completed courses are automatically marked "Done" when all steps are checked off.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>Centralization was the most-requested fix in user research. Students shouldn't need to open Canvas and three other apps to understand their total workload.</p>
+            </div>
+          </div>
+
+          <!-- 06 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">06</span>
+              <span class="proto-badge" style="background:#fef3c7; color:#d97706;">CORE · TASKS</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Task Detail</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">Step-by-step breakdown of a single course assignment with checkboxes, milestone markers, a progress bar, and a celebration state when all steps are complete.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>Breaking big assignments into small, checkable steps is the central hypothesis of StudyFlow — this screen is where that hypothesis is directly tested.</p>
+            </div>
+          </div>
+
+          <!-- 07 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">07</span>
+              <span class="proto-badge" style="background:#ede9fe; color:#7c3aed;">CORE · ANALYTICS</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Progress</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">Tabbed view across Week, Courses, and Timeline. Shows study hours, task completion rates, course-level progress bars, and an activity timeline.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>Students reported feeling relief when progress was visible. The progress screen makes invisible effort tangible — reinforcing momentum and reducing anxiety.</p>
+            </div>
+          </div>
+
+          <!-- 08 -->
+          <div class="proto-page">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">08</span>
+              <span class="proto-badge" style="background:#dbeafe; color:#2563eb;">CORE · AI</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">AI Assistant</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">Conversational AI chat interface with suggested prompts, quick-reply chips, and contextual responses. Accessible from every screen via the bottom nav.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>The AI is positioned as a supportive guide, not an answer machine — framing that preserves student agency while lowering the barrier to starting.</p>
+            </div>
+          </div>
+
+          <!-- 09 -->
+          <div class="proto-page" style="border-bottom:none; padding-bottom:0;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <span style="font-size:26px; font-weight:900; color:#e2e8f0; line-height:1; min-width:32px;">09</span>
+              <span class="proto-badge" style="background:#f1f5f9; color:#64748b;">SETTINGS</span>
+            </div>
+            <h3 style="font-size:19px; font-weight:800; color:#0f172a; margin-bottom:7px;">Profile</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.75; margin-bottom:12px;">User profile with Canvas LMS integration (connect/disconnect with live status), quick links to Schedule and Tasks, notification and dark mode toggles, and sign-out.</p>
+            <div class="rationale-box">
+              <div class="rationale-label">DESIGN RATIONALE</div>
+              <p>Canvas integration is the bridge between StudyFlow and real coursework. Making it prominent in settings signals that the app is meant to work alongside existing tools, not replace them.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <div class="footer-logo"><span>🎓</span><strong>StudyFlow</strong></div>
+      <p>Anna Huang · UX Research & Interaction Design · University of Washington · INFO 360 · Spring 2026</p>
+    </div>
+    <div style="display:flex; gap:16px; align-items:center;">
+      <a href="#process" style="font-size:13px; color:var(--muted); text-decoration:none;">Case Study ↑</a>
+      <a href="./app/index.html" class="footer-cta">View Full Live Prototype →</a>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Active nav highlight by current section
+    const navLinks = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
+    const sectionIds = navLinks.map((link) => link.getAttribute('href')?.slice(1)).filter(Boolean);
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((section) => section !== null);
+    let activeSectionId = "";
+
+    const setActiveNav = (id) => {
+      if (id === activeSectionId) return;
+      activeSectionId = id;
+      navLinks.forEach((link) => {
+        const linkId = link.getAttribute('href')?.slice(1) ?? "";
+        const isActive = linkId === id;
+        link.classList.toggle('active-section', isActive);
+        if (isActive) {
+          link.setAttribute('aria-current', 'true');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const updateActiveSection = () => {
+      if (!sections.length) return;
+      const marker = window.innerHeight * 0.34;
+      const firstTop = sections[0].getBoundingClientRect().top;
+      if (firstTop > marker) {
+        setActiveNav("");
+        return;
+      }
+
+      let currentId = sections[0].id;
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top - marker <= 0) {
+          currentId = section.id;
+        }
+      });
+      setActiveNav(currentId);
+    };
+
+    window.addEventListener('scroll', updateActiveSection, { passive: true });
+    window.addEventListener('resize', updateActiveSection);
+    window.addEventListener('hashchange', updateActiveSection);
+    updateActiveSection();
+
+    // Card hover tilt + click ripple
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cardSelectors = [
+      '.stat-cell',
+      '.callout',
+      '.quote-card',
+      '.feature-card',
+      '.eval-card',
+      '.reflection-card',
+      '.method-box',
+      '.rationale-box'
+    ];
+    const cards = document.querySelectorAll(cardSelectors.join(','));
+    cards.forEach((card) => {
+      card.classList.add('interactive-card');
+
+      card.addEventListener('pointermove', (e) => {
+        if (reduceMotion) return;
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+        const rotateY = (px - 0.5) * 8;
+        const rotateX = (0.5 - py) * 8;
+        card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-3px)`;
+      });
+
+      card.addEventListener('pointerleave', () => {
+        card.style.transform = '';
+      });
+
+      card.addEventListener('pointerdown', (e) => {
+        card.classList.add('is-pressed');
+        if (!reduceMotion) {
+          const rect = card.getBoundingClientRect();
+          const ripple = document.createElement('span');
+          ripple.className = 'card-ripple';
+          ripple.style.left = `${e.clientX - rect.left}px`;
+          ripple.style.top = `${e.clientY - rect.top}px`;
+          card.appendChild(ripple);
+          ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+        }
+      });
+
+      card.addEventListener('pointerup', () => card.classList.remove('is-pressed'));
+      card.addEventListener('pointercancel', () => card.classList.remove('is-pressed'));
+    });
+
+    // Magnetic CTA buttons
+    const magneticBtns = document.querySelectorAll('.btn-primary, .btn-secondary, .nav-cta, .footer-cta');
+    magneticBtns.forEach((btn) => {
+      btn.classList.add('magnetic-btn');
+      btn.addEventListener('mousemove', (e) => {
+        if (reduceMotion) return;
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.08}px, ${y * 0.08}px)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    });
+  </script>
+</body>
+</html>
